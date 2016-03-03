@@ -1,0 +1,77 @@
+Due date: 10/5/2014 @ 11:59pm
+
+Objective: Learn how to implement higher level abstractions
+
+Assignment:
+~~~~~~~~~~~
+
+Add the following to our p4 code:
+
+(1) A static method Process::sleepUntil(seconds), causes the calling process to block until
+    the current time as returned by Pit::seconds() is greater than or equal to seconds
+
+(2) Another static method Process::sleepFor(seconds), causes the calling process to 
+    sleep for the given number of seconds
+
+(3) Change the scheduler (Process::yield) and introduce the notion of the idle process. The
+    idle process is implemented by the class IdleProcess and will run if and only if no other
+    process is ready to run. The idle process never exits once it's created
+
+(4) Add a counter Process::idleJiffies which is incremented every time a decrementer (PIT)
+    interrupt occurs while the idle process is running.
+
+To compile:
+~~~~~~~~~~~
+
+    make
+
+To run test:
+~~~~~~~~~~~~
+
+    make clean test
+
+To make the output less noisy:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    make -s clean test
+
+test.out contains the output from running the test
+test.ok contains the expected output
+test.diff contains the difference between the two (using diff)
+
+To run by hand
+~~~~~~~~~~~~~~
+
+    make
+    qemu -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+To attach with gdb
+~~~~~~~~~~~~~~~~~~
+
+It's a good idea to change the -O3 to -O0 in common.mak if you want to debug
+with gdb
+
+    make
+    qemu -S -s -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+  then in another window
+
+    > gdb kernel/kernel
+    (gdb) target remote localhost:1234
+    (gdb) # define breakpoint, etc
+    (gdb) cont
+
+Printing to the console:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+You might find Debug::printf(...) and Debug::panic(...) useful. Both are in
+kernel/debug.cc
+
+Process::trace(...) is another useful function. It includes information
+about the process generating the output
+
+Files to leave alone:
+~~~~~~~~~~~~~~~~~~~~~
+
+kernel.cc, init.cc, pic.cc, pit.cc
+

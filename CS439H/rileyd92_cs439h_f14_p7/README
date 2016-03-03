@@ -1,0 +1,141 @@
+Due date: 10/26/2014 @ 11:59pm
+
+Objective: Learn how switch back and forth between user and kernel modes
+
+Assignment:
+~~~~~~~~~~~
+
+Please don't forget to answer the questions in REPORT.txt
+
+The objective of this assignment is to start running user processes and
+to learn how to switch from kernel to user and from user to kernel.
+
+This will require adding support for a number of features in our kernel:
+
+   - An ELF loader. Something that knows how to examine an executable file
+     and load it into memory.
+
+     We don't have a file system yet so we will dump the user program
+     in a second hard drive (hdd) and load it from there
+
+   - Logic to switch from kernel to user space.
+
+   - A system call interface to allow user programs to ask for
+     kernel services.
+
+The ELF loader:
+~~~~~~~~~~~~~~~
+
+A new file kernel/elf.h has been added. It contains declarations that will
+help you implement your elf loader. The loader itself should be implemented
+in the function loadElf in init.cc
+
+In order to help you load the image from the hard drive, a simple IDE
+driver is provided. You can read a sector from the hard drive by calling:
+
+    ide_readSector(int drive, uint32_t sector, void* buf)
+
+The arguments are:
+
+    drive - the drive number (3 for hdd)
+    sector - the 512 byte sector number
+    buf - a 512 byte buffer in which the sector is read
+
+After loading the ELF file in memory, loadElf should switch to user mode. The
+initial PC is set to the entry point in the ELF file and the initial PC
+should be set to 0xfffffff0
+
+The system call interface
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+User programs make system calls using the "int $100" instruction.
+
+System calls use a different calling convention from normal functions.
+
+The user program passes 3 arguments to the kernel in %eax, %ecx, and %edx
+
+%eax contains the system call number and %ecx and %edx are arguments
+for the system call.
+
+Only one system call is defined this week:
+
+exit (%eax == 0):
+    %ecx: exit code
+    %edx: ignored
+
+The virtual address space
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The virtual address space is similar to that of p6:
+
+0x00000000 - 0x00001000 (invalid)
+0x00100000 - 0x00400000 (kernel)
+0x80000000 - 0xffffffff+1 (user)
+
+All user-level page faults are resolved using zero-filled memory
+
+The directory structure
+~~~~~~~~~~~~~~~~~~~~~~~
+
+A new subdirectory (user) has been added that contains the user program.
+
+The user program is written in C and doesn't have access to any of the kernel
+data or code.
+
+Issuing system calls is the only way for the user program to
+directly interact with the kernel
+
+To compile:
+~~~~~~~~~~~
+
+    make
+
+To run test:
+~~~~~~~~~~~~
+
+    make clean test
+
+To make the output less noisy:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    make -s clean test
+
+test.out contains the output from running the test
+test.ok contains the expected output
+test.diff contains the difference between the two (using diff)
+
+To run by hand
+~~~~~~~~~~~~~~
+
+    make
+    qemu -nographic --serial mon:stdio -hdc kernel/kernel.img -hdd user/user
+
+To attach with gdb
+~~~~~~~~~~~~~~~~~~
+
+It's a good idea to change the -O3 to -O0 in common.mak if you want to debug
+with gdb
+
+    make
+    qemu -S -s -nographic --serial mon:stdio -hdc kernel/kernel.img -hdd user/user
+
+  then in another window
+
+    > gdb kernel/kernel
+    (gdb) target remote localhost:1234
+    (gdb) # define breakpoint, etc
+    (gdb) cont
+
+Printing to the console:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+You might find Debug::printf(...) and Debug::panic(...) useful. Both are in
+kernel/debug.cc
+
+Process::trace(...) is another useful function. It includes information
+about the process generating the output
+
+Files to leave alone:
+~~~~~~~~~~~~~~~~~~~~~
+
+kernel.cc, init.cc

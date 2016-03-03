@@ -1,0 +1,19 @@
+- Show the sequence of function calls that take place if
+a process is running with interrupts enabled and a timer
+interrupt occurs.
+
+- What does the stack look like as we enter pic_irq? The running
+process doesn't know that it's getting interrupted, who saves
+its registers, ESP, PC, and FLAGS? Where?
+
+- Let's say process A (count > 0) is switching to process B
+(count == 0), who turns on interrupts? when?
+
+- Let's say process A (count == 0) is switching to process B
+(count > 0), who turns off interrupts? when?
+
+- What happens if you get interrupted while you in the
+middle of a context switch? Does that lead to recursive
+context switching? What does it mean?
+
+

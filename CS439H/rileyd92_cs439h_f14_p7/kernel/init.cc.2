@@ -1,0 +1,55 @@
+#include "init.h"
+#include "process.h"
+
+int done = 0;
+
+class Noise : public Process {
+public:
+    Noise() : Process("noise") {
+    }
+    void check(int* p) {
+        for (int i=0; i<1024; i++) {
+            if (p[i] != 0) {
+                Debug::panic("expecting 0 at va=%x, found 0x%x",&p[i],p[i]);
+            }
+        }
+    }
+    void run() {
+        int *p = (int*) 0x80000000;
+        int *q = (int*) 0x90000000;
+        check(p);
+        check(q);
+        *p = 10;
+        *q = 20;
+
+        if ((*p != 10) || (*q != 20)) {
+            trace("p = %d, q = %d", *p, *q);
+        }
+        done ++; 
+    }
+};
+
+Init::Init() : Process("init") {
+}
+
+void Init::run() {
+    Process::trace("starting");
+
+    int count = 5000;
+
+    trace("creating %d processes",count);
+
+    for (int i=0; i<count; i++) {
+        Noise* p = new Noise();
+        p->start();
+        p->doneEvent.wait();
+        delete p;
+    }
+    
+    if (count != done) {
+        Debug::panic("failed: count=%d, done=%d",count,done);
+    }
+   
+    Process::trace("done %d",done);
+    Debug::shutdown("Good bye!");
+}

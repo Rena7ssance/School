@@ -1,0 +1,111 @@
+Due date: 10/12/2014 @ 11:59pm
+
+Objective: Learn how to manage page tables
+
+Assignment:
+~~~~~~~~~~~
+
+Edit REPORT.txt and answer the questions.
+
+Complete the implementation of the given kernel by adding support for:
+
+   - managing physical frames (class PhysMem)
+   - creating per-process virtual memory mappings (class AddressSpace)
+
+The kernel initialization code calls PhysMem::init with two arguments:
+
+   - the lowest available physical address
+   - the highest available physical address
+
+PhysMem::init should initialize any data structures it needs in order to
+implement the two methods:
+
+   - uint32_t PhysMem::alloc()    - allocate a frame and return its address
+   - void PhysMem::free(uint32_t) - free the given frame
+
+All frames are 4K in size and are 4K aligned
+
+Each Process gets a new field (AddressSpace addressSpace) representing the
+virtual address space of the process.
+
+The virtual address space for each process is as follows:
+
+0x00000000-0x00001000   -  invalid. any attempt to access it kills the process with the message "seg0"
+
+0x00001000-0x00400000   -  shared between all processes. Mapped in VA=PA mode
+
+0x00400000-             -  process private. Demand paged with zero-filled 
+                           pages. Each process gets its private copy of
+                           this range. A page fault in this range allocates
+                           a new frame, fills it with zeroes and maps it
+                           to the faulting virtual address then resumes the
+                           process
+
+The AddressSpace class has the following methods:
+
+    - pmap(va,pa,forUser,forWrite)
+                        - creates a mapping from the given VA to the given PA
+                          forUser => available in user mode
+                          forWrite => writable
+
+    - handlePageFault(va)
+                        - called when a page fault for the given address
+                          occurs
+
+    - activate()          - make this the active address space
+ 
+
+To compile:
+~~~~~~~~~~~
+
+    make
+
+To run test:
+~~~~~~~~~~~~
+
+    make clean test
+
+To make the output less noisy:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    make -s clean test
+
+test.out contains the output from running the test
+test.ok contains the expected output
+test.diff contains the difference between the two (using diff)
+
+To run by hand
+~~~~~~~~~~~~~~
+
+    make
+    qemu -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+To attach with gdb
+~~~~~~~~~~~~~~~~~~
+
+It's a good idea to change the -O3 to -O0 in common.mak if you want to debug
+with gdb
+
+    make
+    qemu -S -s -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+  then in another window
+
+    > gdb kernel/kernel
+    (gdb) target remote localhost:1234
+    (gdb) # define breakpoint, etc
+    (gdb) cont
+
+Printing to the console:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+You might find Debug::printf(...) and Debug::panic(...) useful. Both are in
+kernel/debug.cc
+
+Process::trace(...) is another useful function. It includes information
+about the process generating the output
+
+Files to leave alone:
+~~~~~~~~~~~~~~~~~~~~~
+
+kernel.cc, init.cc

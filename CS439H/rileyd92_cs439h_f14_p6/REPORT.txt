@@ -1,0 +1,9 @@
+- The method AddressSpace::handlePageFault is where page faults are handled.
+  Show the sequence of events (processor actions, function calls) that take
+  place between the time a process references an invalid memory address until
+  AddressSpace::handlePageFault is called
+
+	When a process references an invalid memory address, the hardware interrupts to the kernel. That interrupt is then looked up in the Interrupt Descriptor Table (IDT), based on the identification number of the interrupt, and it is seen that it is a page fault interrupt. From there, the IDT references an index in the Global Descriptor Table (GDT) that describes the section of code where the function AddressSpace::handlePageFault lives. We see in machine.S that the initialization of physical memory set up the IDT in such a way, using setTrapDescriptor, as to point page fault interrupts towards our AddressSpace::handlePageFault. The hardware will then save the state, and begin executing the code pointed to in the GDT, thus executing the AddressSpace::handlePageFault. 
+
+	  
+

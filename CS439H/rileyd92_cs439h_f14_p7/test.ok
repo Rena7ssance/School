@@ -1,0 +1,13 @@
+spawn qemu-system-x86_64 -nographic --serial mon:stdio -hdc kernel/kernel.img -hdd user/user
+x
+What just happened? Who am I? Why am I here?
+I am K439, welcome to my world
+I have a heap
+[] Process tracing enabled
+Pit::init freq=1000HZ, divide=1193
+Pit::init requested:1000Hz, actual:1000Hz
+[] Let there be processes
+[init#0] loading user code
+[init#0] syscall(0,315,0)
+idle
+*** System Shutdown ***

@@ -1,0 +1,27 @@
+- Show the sequence of function calls that take place if
+a process is running with interrupts enabled and a timer
+interrupt occurs.
+
+Once the pit reaches zero, the hardware automatically calls the irq0 function in machine.S. From there, the sequence of function calls is as follows: irq0 -> irq_common -> pic_irq -> startIrq -> pit::handler -> pic_eoi -> yield -> endIr1
+
+- What does the stack look like as we enter pic_irq? The running
+process doesn't know that it's getting interrupted, who saves
+its registers, ESP, PC, and FLAGS? Where?
+
+The context switch function saves the current process’ registers, stack pointer, pc and flags in machine.S. From there, it is able to switch to a new process. 
+
+- Let's say process A (count > 0) is switching to process B
+(count == 0), who turns on interrupts? when?
+
+Process A is running with interrupts turned off. When it switches to Process B, whose count == 0 indicating that interrupts are enabled for Process B, interrupts are turned back on during the contextSwitch from Process A back into Process B. This is done with the instructions “push %edx, popf”, which pushes the interrupt flag onto the stack, and then pops it into the flags for Process B, which hold the interrupt flag. 
+
+- Let's say process A (count == 0) is switching to process B
+(count > 0), who turns off interrupts? when?
+
+Very similar to the question above, Process A is running with interrupts turned on. When it switches to Process B, whose count > 0 indicating that interrupts are disabled for Process B, interrupts are turned off during the contextSwitch from Process A back into Process B. This is done with the instructions “push %edx, popf”, which pushes the interrupt flag onto the stack, and then pops it into the flags for Process B, which hold the interrupt flag. 
+
+- What happens if you get interrupted while you in the
+middle of a context switch? Does that lead to recursive
+context switching? What does it mean?
+
+Before calling context switch, interrupts are turned off. Therefore, if an interrupt comes  in the middle of a context switch, it won’t be until after we exit the context switch that the interrupt handler has the chance to deal with the incoming interrupt. As such, this will not lead to recursive context switching and allows for safe context switching between processes. 

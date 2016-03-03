@@ -1,0 +1,202 @@
+Due date: 9/28/2014 @ 11:59pm
+
+Objective: Learn how to handle concurrency issues caused by
+interrupts in a single processor system.
+
+Hints:
+~~~~~~
+
+You need to add around 20 lines of code for this assignment but
+the trick is to place them in the correct places. The kinds of
+failures you get when the code is missing or is in the wrong place
+are hard to debug without using the the proper tools:
+
+- gdb or something like it
+- examining memory for stack and register state
+
+Attempting to print to the console will slow things down
+and might hide errors
+
+Test your Event implementation in isolation and make sure it
+works before you plug it in.
+
+Putting a call to Process::disable() in runProcess will disable
+interrupts for all processes. This might be a good trick
+for incremental testing.
+
+You might be better off commenting out parts of the tests as a 
+way of trying to figure out the sources of race conditions
+
+Assignment:
+~~~~~~~~~~~
+
+(1) Finish the implementation of the given code and answer the
+questions in REPORT.txt
+
+(2) Finish the implementation of the Event class (in semaphore.h)
+
+The Event class is used to signal the one-time occurrence of an
+event (e.g. a process starting, terminating, etc). A process
+can wait for an event (e) by calling e.wait(). A process
+can signal the occurrence of an event by calling e.signal().
+Once an event is signalled, it stays in the signalled state
+for the rest of its lifetime.
+
+In p3 you learned how to work with cooperative processes. In this
+assignment we enable interrupts; most notably the programmable
+interrupt timer (PIT).
+
+We program the PIT to generate timer interrupt at an artificially
+high rate (1000 Hz) and force a process context switch at the
+end of each interrupt.
+
+At the low-level, Concurrency control will be done by disabling
+interrupts in order to protect critical sections. Semaphores are
+used to implement high-level abstraction that require blocking.
+
+I removed all calls to Process::disable and Process::enable, the
+static methods that enable/disable interrupts. This will lead
+to numerous race conditions and will cause the test case to behave
+in unpredictable (and mostly incorrect) ways.
+
+Your assignment is to read through the code, understand it, and
+place those calls at the right spots.
+
+Here are the rules:
+
+    - Interrupts should be enabled iff a process is running
+
+    - Interrupt handlers can't block (by calling Semaphore::wait)
+
+    - Interrupts should be kept disabled while an interrupt handler
+      is running in order to prevent nested interrupts and the
+      potential for stack overflow
+
+    - A context switch is forced at the of interrupt handling, this
+      is too aggressive but is a good test for the robustness of
+      your implementation
+
+    - Interrupt handlers can use the heap. This is unusual and we'll
+      need to fix it in the future
+
+    - Interrupts should be enabled as soon as possible after they're
+      disabled
+
+
+The interrupt API:
+~~~~~~~~~~~~~~~~~~
+
+Two methods Process::disable and Process::enable are used to manage
+the interrupt state. They work as follows:
+
+- Each process has a disable count (initialized to 0)
+
+- If disable count is > 0, interrupts are disabled while
+  the process is running.
+
+- If disable count is 0, interrupts are enabled while
+  the process is running.
+
+- When a context switch happens, the new process disable count
+  determines the interrupt state.
+
+- Interrupts are always disabled if no process is running. For
+  example, during initialization and termination.
+
+- Process::disable and Process::enable don't manipulate interrupts
+  directly. Instead, they increment/decrement the counter for
+  the current process and adjust the interrupt enable state
+  according to the new value of the counter
+
+- Hardware automatically disables interrupts when it starts
+  processing an interrupt. Returning from the interrupt handler
+  using "iret" restores EFLAGS from the stack and, unless you've
+  changed it, will restore the interrupt state.
+
+Notes:
+~~~~~~
+
+This assignment is designed to force you to read through the code
+and play the race condition scenarios in your head. Some of those
+scenarios are simple and some (e.g. those that involve context
+switching) require some imagination.
+
+The amount of code you need to write is small. You just need to
+place it strategically. Too little concurrency control will
+produce unpredictable results, too much will prevent forward
+progress.
+
+Start by understanding the interrupt handling path: irq0 ->
+irq_common -> pic_irq -> ...
+
+Try to make sense out of Process::disable and Process::enable
+
+Try to make sense out of Process::startIrq and Process::endIr.
+Why are they needed?
+
+What does the stack look like as we enter pic_irq? The running
+process doesn't know that it's getting interrupted, who saves
+its registers, ESP, PC, and FLAGS? Where?
+
+Let's say process A (count > 0) is switching to process B
+(count == 0), who turns on interrupts? when?
+
+What happens if you get interrupted while you in the
+middle of a context switch? Does that lead to recursive
+context switching? What does it mean?
+
+To compile:
+~~~~~~~~~~~
+
+    make
+
+To run test:
+~~~~~~~~~~~~
+
+    make clean test
+
+To make the output less noisy:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    make -s clean test
+
+test.out contains the output from running the test
+test.ok contains the expected output
+test.diff contains the difference between the two (using diff)
+
+To run by hand
+~~~~~~~~~~~~~~
+
+    make
+    qemu -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+To attach with gdb
+~~~~~~~~~~~~~~~~~~
+
+It's a good idea to change the -O3 to -O0 in common.mak if you want to debug
+with gdb
+
+    make
+    qemu -S -s -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+  then in another window
+
+    > gdb kernel/kernel
+    (gdb) target remote localhost:1234
+    (gdb) # define breakpoint, etc
+    (gdb) cont
+
+Printing to the console:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+You might find Debug::printf(...) and Debug::panic(...) useful. Both are in
+kernel/debug.cc
+
+Process::trace(...) is another useful function. It includes information
+about the process generating the output
+
+Files to leave alone:
+~~~~~~~~~~~~~~~~~~~~~
+
+kernel.cc, init.cc, pic.cc, pit.cc
+

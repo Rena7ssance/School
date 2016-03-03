@@ -1,0 +1,17 @@
+spawn qemu-system-x86_64 -nographic --serial mon:stdio -hdc kernel/kernel.img
+x
+What just happened? Who am I? Why am I here?
+I am K439, welcome to my world
+I have a heap
+[] Process tracing enabled
+Pit::init freq=1000HZ, divide=1193
+Pit::init requested:1000Hz, actual:1000Hz
+[] Let there be processes
+[init#0] starting
+[p0#2] n=1000, iters=100000, sum=2705359744, expected=2705359744
+[p1#3] n=10000, iters=10000, sum=1733793664, expected=1733793664
+[p2#4] n=100000, iters=1000, sum=608067456, expected=608067456
+[init#0] seg0
+[init#0] done
+Good bye!
+*** System Shutdown ***

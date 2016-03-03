@@ -1,0 +1,139 @@
+Due date: 9/21/2014 @ 11:59pm
+
+Objective:
+~~~~~~~~~~
+
+Develop a deeper understanding of process creation, scheduling,
+context-switching, and synchronization.
+
+Unlike p2, this assignments requires you to read and understand the existing
+code before you start writing your own. Very little code needs to be
+written for this assignment.
+
+Make sure you understand the following before you start adding code:
+
+- the magical contextSwitch function in machine.S
+- all the code in Process.cc, Process.h, and init.cc
+
+Assignment:
+~~~~~~~~~~~
+
+Finish the implementation of the Process and Semaphore classes (process.cc,
+process.h).
+
+We're still running an a limited environment:
+
+- in physical memory
+- in kernel mode
+- with a 1M heap starting at 0x100000
+- interrupts are disabled
+- single hardware thread
+- ignoring concurrency issues
+- we only deal with general purpose registers (no floating point, no SSE yet)
+
+We now add two new abstractions:
+
+- processes (class Process)
+- semaphores (class Semaphore)
+
+We'll also build a bounded-buffer using an array and 3 semaphores as we
+discussed in class.
+
+We're still running in the kernel (not switching to user mode) and our
+processes run strictly in the kernel address space. This makes them
+look more like threads than processes but this limitation will disappear
+when we enable virtual memory and start having an address space per process.
+
+For now, our processes will look like threads and, as a matter of fact,
+their programming interfaces is modelled after Java threads.
+
+Each new process is allocated an 8K kernel stack from the heap when that
+process is created.
+
+The Process API:
+~~~~~~~~~~~~~~~~
+
+To create a new process:
+
+    - define a new class that inherits from the Process class
+    - put the process logic in the run() method of the new class
+    - create an instance of your class (Process* p = new MyProcess())
+
+Our processes are cooperative (non preemptive). A process yields the CPU
+by calling Process::yield()
+
+A process exits by either returning from the run() method or by calling
+Process:exit()
+
+A process could be killed by calling the kill() method.
+
+A process could react to the kill event by overriding the onKill method
+
+A process could react to the exit event by overriding the onExit method
+
+To compile:
+~~~~~~~~~~~
+
+    make
+
+To run test:
+~~~~~~~~~~~~
+
+    make clean test
+
+To make the output less noisy:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    make -s clean test
+
+test.out contains the output from running the test
+test.ok contains the expected output
+test.diff contains the difference between the two (using diff)
+
+To run by hand
+~~~~~~~~~~~~~~
+
+    make
+    qemu -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+To attach with gdb
+~~~~~~~~~~~~~~~~~~
+
+It's a good idea to change the -O3 to -O0 in common.mak if you want to debug
+with gdb
+
+    make
+    qemu -S -s -nographic --serial mon:stdio -hdc kernel/kernel.img
+
+  then in another window
+
+    > gdb kernel/kernel
+    (gdb) target remote localhost:1234
+    (gdb) # define breakpoint, etc
+    (gdb) cont
+
+Printing to the console:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+You might find Debug::printf(...) and Debug::panic(...) useful. Both are in
+kernel/debug.cc
+
+Process::trace(...) is another useful function. It includes information
+about the process generating the output
+
+Files you can change:
+~~~~~~~~~~~~~~~~~~~~~
+
+    kernel/process.h, kernel/process.cc,
+    kernel/bb.h, kernel/bb.cc
+
+Leave everything else alone
+
+
+Files to study:
+~~~~~~~~~~~~~~~
+
+Make sure you understand the contextSwitch function in machine.S. It looks
+simple but it is indeed magical.
+
+Make sure you study process.cc, kernel.cc, and init.cc

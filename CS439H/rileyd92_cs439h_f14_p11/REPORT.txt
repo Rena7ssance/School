@@ -1,0 +1,36 @@
+
+- Explain how the arguments make it all the way from user program invoking
+  execv until they turn into main's argc, and argv for the target program
+
+	The user program passes the name of the program to run, and the arguments from the command line, in the form of a pointer to an array of char pointers (strings), to the execv system call. There it goes to the execv system call, which takes each of the argument strings, and puts them into a queue. While the system call is doing this, it is keeping track of the number of arguments it has. There it takes the name of the command, along with the arguments and the number of arguments, and calls the process execs. There in process::execv(), the count of arguments, argc, and the arguments themselves, argv[], are put onto the stack so that they can be used in whatever program is being execv-ed by the process. They are then put onto the stack in reverse order, argc then argv, to be sued by the target program.  
+
+- My implementation of execv in syscall.cc is not secure. Show a user
+  program that can read any memory address by exploiting my bad code.
+
+	It is not secure because a malicious user can pass the address, in the kernel for instance, as an argument to a program like echo which will print out that address’ value. This is due to the method in which syscall handles the execv system call, dereferencing the pointer that it is given as the arguments to the target program, without checking if it is kernel space. Example program; say the malicious user wants to read the memory address 0x00010000 (assuming it is mapped): 
+
+int main() {
+	char** a = malloc(8);
+	a[0] = (char*)(0x00010000);
+	a[1] = ‘\0’;
+	long id = fork();
+	if(id == 0) {
+		execv(“echo”, a);
+	}
+	else {
+		join(id);
+	}
+	return 0;
+}
+
+
+- How would we change the code to protect against this attack?
+
+	In the syscall execv, add a check that an argument is only added to the argument queue, and subsequently passed to the target program, if it lives in user space and points only to locations in user space. That would prevent malicious users from being able to read kernel memory, as shown in the user program above.  
+
+- What do we need to change in order to implement input and output
+  redirection and pipes in the shell?
+
+	For redirection, we would need to create a child process, and change the standard out resource to the file in which we want to write. This can be done with the command sequence “close(1); open(file);”. This will set the standard output to the file as opposed  to the console. This is how we would be able to implement redirection.
+	For piping, we need to implement a system call so we can create a bounded buffer in the kernel. Then, we can set the set the standard out of the first command to this bounded buffer, in the same manner as above. We would then need to set the standard input of the second command to that same bounded buffer (“close(0); open(pipe)”). This is how we would be able to implement a pipe.
+

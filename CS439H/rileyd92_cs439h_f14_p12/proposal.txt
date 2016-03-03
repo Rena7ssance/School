@@ -1,0 +1,20 @@
+For project #12, I fixed the TTY driver to handle the user enter the backspace key. The command prompt, because of that, is much more user friendly and functional. 
+
+I also was able to implement piping between the commands ls, cat, and echo, in addition to adding sort. 
+
+In addition, I added functionality to the ls, cat, and echo functions in the way of flags, in order to add more functionality like the flags in the linux shell. The flags included were:
+
+ls
+  -a: do not hide entries that begin with .
+  -r: Reverse order while sorting
+  -1: list one file per line
+
+cat
+  -n: number all output lines
+  -b: number non-blank output lines
+  -e: display $ at the end of each line
+
+echo
+  -n: do not output the trailing newline
+
+This was a solo project; the amount of work stated above, I believe, constitutes working alone.

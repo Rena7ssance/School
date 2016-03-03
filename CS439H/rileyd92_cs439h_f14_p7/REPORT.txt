@@ -1,0 +1,15 @@
+
+- Explain the reason for the call to TSS::esp0 in Process::dispatch
+
+	The reason for the call to TSS::esp0 in Process::dispatch is to save the Process  stack pointer so that it is saved in the TSS, so that its location is known when switching from kernel to user. 
+
+- Show the sequence of function calls that take place from the time
+  loadElf is called until the user's main program is running
+
+	The loadElf function is called, and the function calls the ide_readSector function to load the zero sector into a buffer. In the ide_readSector, the outb() function in machine.S is called to put values in the specified ports. Then, the waitForDrive function is called, in order to check the status of the drive, calling inb() from machine.S in the process. Ide_readSector is called whenever a new sector of the drive needs to be read in, depending on the size of the ELF file. Finally at the end, switchToUser from machine.S is called, in which the proper registers are pushed onto the stack, and then iret is called to switch to user code. 
+
+- Show the sequence of function calls (and traps) that take place from
+  the time the user's main program returns until the user process
+  terminates
+
+	The user process terminates and calls syscallTrap, which in turn calls the syscallHandler. In the syscallHandler, if the system call number is zero, then the current process exits. 

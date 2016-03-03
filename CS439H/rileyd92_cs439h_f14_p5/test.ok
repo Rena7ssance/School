@@ -1,0 +1,16 @@
+spawn qemu-system-x86_64 -nographic --serial mon:stdio -hdc kernel/kernel.img
+x
+What just happened? Who am I? Why am I here?
+I am K439, welcome to my world
+I have a heap
+[] Process tracing enabled
+Pit::init freq=1000HZ, divide=1193
+Pit::init requested:1000Hz, actual:1000Hz
+[] Let there be processes
+[init#0] starting
+[init#0] will run for about 18 seconds
+aAbBcCdDeEFGHI
+[init#0] done
+idle jiffies is in range
+Good bye!
+*** System Shutdown ***
