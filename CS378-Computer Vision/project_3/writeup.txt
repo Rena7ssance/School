@@ -1,0 +1,21 @@
+Project 3: Tracking
+========================
+
+Kevin Yeh, Jaime Rivera, Riley Gibson
+
+You can run the gen_multi_track.sh script to generate our NY Multi-tracking video as ny_data/ny_multi.avi. You can also manually input your own arguments to pedestrian_tracking.py.
+
+    Usage: ./pedestrian_tracking.py video classifier output_filename [tracking_window] [viz T|F]
+
+
+Methods
+===========
+Ball 1: Detect bounds using thresholded frames and naive foreground pixel bounding.
+
+Ball 2: Median subtraction + threshold detection.
+
+Ball 3: Median subtraction + threshold detection.
+
+Ball 4: Gaussian Blur for initial HoughCircle detection, then meanshift for tracking.
+
+Face: Kalman Tracking using model [x, y, w, h, vx, vy, ax, ay] backing up direct Haar Cascade detection.

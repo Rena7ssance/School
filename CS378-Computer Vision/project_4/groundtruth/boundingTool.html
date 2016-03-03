@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    <style type="text/css">
+        body {margin:0px;}
+    </style>
+        <script type="text/javascript" src="https://raw.githubusercontent.com/eligrey/FileSaver.js/master/FileSaver.min.js"></script>
+        <script type="text/javascript" src="https://raw.githubusercontent.com/adobe-webplatform/Snap.svg/master/dist/snap.svg-min.js" ></script>
+        <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+       <script type="text/javascript">
+            window.color ="#FF0000";
+            function updateImage()
+            {
+                imgfile = document.getElementById("flImage").files[0];
+                var img = document.getElementById("preview");
+                img.file = imgfile;
+                var reader = new FileReader();
+                reader.onload = (function(aimg) { return function(e) { aimg.src = e.target.result; };})(img);
+                reader.onloadend = function() {
+                    $("#mysvg").width($("#preview").width());
+                    $("#mysvg").height($("#preview").height());
+                }
+                reader.readAsDataURL(imgfile);
+                window.svg = Snap("#mysvg");
+                window.svg.mousedown(function(x)
+                {
+                    window.x = x.clientX+$(document).scrollLeft();
+                    window.y = x.clientY+$(document).scrollTop();
+                });
+                window.svg.mouseup(function(x)
+                {
+                    del = $("#del").prop("checked");
+                    if(!del)
+                    {
+                        nx = x.clientX+$(document).scrollLeft();
+                        ny = x.clientY+$(document).scrollTop();
+                        width = Math.abs(window.x-nx);
+                        height = Math.abs(window.y-ny);
+                        if(width >2 && height >2)
+                        {
+                            r = window.svg.rect(window.x,window.y,width,height);
+                            r.attr({fill:window.color,opacity:.5, stroke: "#000", strokeWidth:2});
+                            r.click(function(){if($("#del").prop("checked")){$(this.node).remove();}});
+                        }
+                    }
+                });
+            }
+            function sendDataset()
+            {
+                rects = $("rect");
+                objlist = []
+                rects.each(function(a,b)
+                {
+                    rect = $(b)
+                    lx = parseInt(rect.attr("x"));
+                    ly = parseInt(rect.attr("y"));
+                    w = parseInt(rect.attr("width"));
+                    h = parseInt(rect.attr("height"));
+                    rx = w+lx;
+                    ry = h+ly;
+                    fill = rect.attr("fill");
+                    objlist.push({lx:lx,ly:ly,rx:rx,ry:ry,group:fill});
+                });
+                data = JSON.stringify(objlist);
+                var blob = new Blob([data], {type: "text/plain;charset=utf-8"});
+                saveAs(blob, "data.txt");
+            }
+            
+       </script>
+    </head>
+    <body>
+        <img id="preview" style="position:absolute;top:0;left:0;z-index:-1" />
+        <svg id="mysvg" width="100%" height="100%" style="position:absolute:top:0;left:0;z-index:100"></svg>
+
+        <div style="position:fixed;top:0px;left:0px;background-color:white;" id="controls">
+        <input type="file" id="flImage" />
+        <button onclick="updateImage()">Load image</button>
+        Red: <input checked="checked" onclick="window.color=this.value" type="radio" name="color" value="#FF0000" />
+        Green: <input checked="checked" onclick="window.color=this.value" type="radio" name="color" value="#00FF00" />
+        Blue: <input checked="checked" onclick="window.color=this.value" type="radio" name="color" value="#0000FF" />
+        Delete mode: <input type="checkbox" id="del"/>
+        <button onclick="sendDataset()">Get JSON</button>
+        </div>
+    </body>
+</html>

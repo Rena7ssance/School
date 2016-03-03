@@ -2,7 +2,7 @@
 # Run unit tests and format checks.
 #
 # Example usage: ./run_tests.sh
-#
+# 
 # Don't edit this file. You can use it to check the correctness
 # of your implementation as you work. I recommend running it
 # early and often to correct style errors and to check which unit
