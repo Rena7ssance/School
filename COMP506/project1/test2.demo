@@ -1,0 +1,22 @@
+procedure test2 {
+  int even, oddsum, evensum, i;
+  int A[0:1000];
+
+  even = 2;
+  oddsum = 0;
+  evensum = 0;
+
+  for i = 0 to 999 by 1 {
+    if(even == 2)
+      then evensum = evensum + A[i];
+      else oddsum = oddsum + A[i];
+
+    if(even == 2)
+      then even = even - 1;
+      else even = even + 1;
+  }
+
+  write evensum;
+  write oddsum;
+
+}

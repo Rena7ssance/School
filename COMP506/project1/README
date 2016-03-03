@@ -1,0 +1,78 @@
+Name: Riley Gibson
+NetID: Rdg2
+
+ASSUMPTIONS
+==================================================
+  Only one .demo file can be scanned and
+  parsed at a time
+
+BUILD
+==================================================
+  To build the scanner and parser, execute
+  the command "make"
+
+  Example:
+    make
+
+EXECUTE
+==================================================
+  To execute the scanner and parser on a
+  .demo file, the command line syntax is
+  ./demo [-h] [filename]
+
+  Example:
+    ./demo AssignArray.demo
+
+STUDENT CREATED TEST FILES
+==================================================
+ test1.demo
+    Creates a 2-D array, initializes the
+    elements to various values, and sums
+    their diagonal values. This tests
+    variable and array declaration, nested
+    for loops, conditional controls, and
+    write commands.
+
+ test2.demo
+    Creates a large 1-D array, and sums
+    the even and odd elements separately.
+    This tests variable declarations, for
+    loops, conditional controls, and array
+    assignment.
+
+TEST RESULTS
+==================================================
+AssignArray.demo........................PASS
+bool.demo...............................PASS
+bsort.demo..............................PASS
+divide.demo.............................PASS
+DocExample.demo.........................PASS
+fib.demo................................PASS
+for.demo................................PASS
+if.demo.................................PASS
+mmult.demo..............................PASS
+nested.demo.............................PASS
+qsort3.demo.............................PASS
+TraceExample.demo.......................PASS
+trivial.demo............................PASS
+while.demo..............................PASS
+
+error1.demo.............................PASS
+error2.demo.............................PASS
+error3.demo.............................PASS
+error4.demo.............................PASS
+
+ut0.demo................................PASS
+ut1.demo................................PASS
+ut2.demo................................PASS
+ut3.demo................................PASS
+ut4.demo................................PASS
+ut5.demo................................PASS
+ut6.demo................................PASS
+ut7.demo................................PASS
+ut8.demo................................PASS
+ut9.demo................................PASS
+ut10.demo...............................PASS
+
+test1.demo..............................PASS
+test2.demo..............................PASS
