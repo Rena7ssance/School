@@ -1,0 +1,17 @@
+Name: Riley Gibson
+NetID: rdg2
+
+I worked on this project by myself. 
+
+I tested my code extensively, depending on the mode, in the following ways:
+
+Ping Pong Mode - First I printed out the contents of the sending and receiving messages on both the client and server, in order to verify that they are sending, and receiving, identical messages. In the cases of very large message sizes, I also ensured that the correct number of bytes sent and received matched. I also printed pertinent information in the client and server messages, like the size and timestamp, in order to ensure that they were arriving and sending correctly. I also tested the entire range of inputs for the size (10 <= size >= 65535) and count (1 <= count >= 10000). The pingpong program worked for the entire range of inputs, sending and receiving the correct amount of data. The latency measured also conformed to a linear regression, as it was expected to do, adding confidence to the relative accuracy of the measurements. 
+
+Web Server Mode - I created a test HTML page that I would use as the target of the web server requests. After I had properly parsed and tested each part of the request to make sure it conformed to the expected request format, I tested to make sure I could access the HTML file based on the given root directory and request file. I also tested to make sure I could read that data reliably, and send/receive that data reliably in a buffer. I also tested how well this worked with other directories; although the requested page could not include a relative path, the root directory could, so I made sure that it found the correct file in such an instance. 
+
+
+There are no known problems with my client/server program in either mode. I tested both the client and server (both modes) on CLEAR, so I don't think that there are any issues as far as that is concerned.  
+
+As expected, to build the programs, run "make" in this directory. You run the client and server programs the same way that was shown in class, but with the proper parameters. The Makefile produces the executables "client_pingpong" and "server_pingpong"; those are the client and server programs to be run, respectively.  
+
+As another testing feature, I enabled my client program to connect to the web server in order to test the server. I used the client to take in a command line message, and pass it to the web server to test how the web server handled requests. I took out that capability for the submition, but this is how I tested the web server. 

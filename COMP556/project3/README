@@ -1,0 +1,86 @@
+Packet Format:
+====================
+                         Header Format
+ 0                   1                   2                   3 
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |    PKT Type   |               |          Content Len        |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                            Offset                           |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                        Sequence Number                      |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                   Acknowledgement Number                    | 
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                            Checksum                         |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+ 
+ |                         Checksum(Cont.)                     |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ |                             Data                            |
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+PKT Type: This field denotes the type of packet being transmitted. 
+There are three possible packet types: begin, normal, and end. Begin 
+type contains the file name, and is the first packet to arrive 
+to the receiver program. Normal type contains the packet content, and
+the End type is the last packet to arrive to the receiver, containing 
+the last of the packet content.  
+
+Content Len: This value gives the length of the data of the packet, excluding
+the length of the packet header. 
+
+Offset: The offset field represents the offset in to the sending file 
+that the content of the packet holds. 
+
+Sequence Number: This field contains the number of the current window being transmitted.
+
+Acknowledgement Number: This is a field exclusively used by the receiver 
+program. It contains the number of the window of the packet that was just
+received from the sender, and uses this field to acknowledge that windows' 
+reception and writing to file. 
+
+Checksum: This field holds the checksum value calculated from the header, 
+minus the checksum fields, and the entire sending file. This is used to
+detect if a packet has been mangled in the transmission process.
+
+Checksum(Cont.): A continuation of the first checksum field; because 
+the checksum value is 128 bits, two 64-bit fields were needed.
+
+Data: The contents of the packet being sent.
+
+Algorithm:
+====================
+We implemented a sliding window algorithm for our protocol on both the sender and receiver
+sides. The sender program maintains an array of pointers, of a fixed size, that point to
+packets. Each pointer has a status associated with it, representing if the packet at this 
+location is empty, has had data from the send file loaded in to it, if it has been sent, and
+if an ACK message associated with this packet has been received. As packets are acknowledged, the
+window slides to view only a portion of the array, representing those packets within that
+window range. On the receiving end, a similar array of window pointers is maintained; based
+on the information in the packet header, a received packet is first checked to see if it has
+been mangled in the transmission process, and if so is discarded. If it is intact, the window
+space associated with that sequence number is checked; if that message has already been received,
+then the new received message is likewise discarded; if not, a pointer to the packet is added to
+the array, and the status of that window is changed to represent the received packet. An ACK
+message is then sent to the sender. If an ACK message is not received by the sender within the
+proper amount of time, a timeout is detected, and that packet is retransmitted; fast retransmission
+is also used when three ACK messages are received in a row. When the last active window of the sender
+is acknowledged, the program terminates. 
+
+Properties/Features:
+====================
+We added and implemented the fast retransmission feature into our protocol. Instead of necessarily
+waiting for a missing acknowledgement message from the receiver, and thus wait for a timeout in
+order to resend the packet, we implemented fast transmission so that if the sender receives three
+ACK messages in a row, it immediately resends the packet. This allows for faster recovery from
+timeout situations, and thus increases our performance. 
+
+Running the Code:
+====================
+The syntax for launching our code is the same as the commands given in the design document.
+
+To launch the sender program:
+	sendfile -r <recv_host>:<recv_port> -f <filename>
+
+To launch the receiver program:
+	recvfile -p <recv_port>
